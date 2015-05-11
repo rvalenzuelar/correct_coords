@@ -6,7 +6,7 @@
 # Raul Valenzuela
 # April, 2015
 
-# I/O directories
+# I/O  dorade directories
 #---------------------------
 # INDIR="$HOME/P3/dorade/case04"
 # # OUTDIR="$HOME/P3/dorade/case04_coords_cor2"
@@ -18,8 +18,11 @@
 # INDIR="$HOME/P3/dorade/case03/leg02"
 # OUTDIR="$HOME/P3/dorade/case03_coords_cor/leg02"
 
-INDIR="$HOME/P3/dorade/case03_all/leg03"
-OUTDIR="$HOME/P3/dorade/case03_coords_cor/leg03_new"
+# INDIR="$HOME/P3/dorade/case03_all/leg03"
+# OUTDIR="$HOME/P3/dorade/case03_coords_cor/leg03_new"
+
+INDIR="$HOME/P3_v2/dorade/c03/leg01_all"
+OUTDIR="$HOME/P3_v2/dorade/c03/leg01_cor"
 
 # standard tape file
 #---------------------------
@@ -34,28 +37,56 @@ PYFUN="$HOME/Github/correct_coords/replace_cfradial_coords.py"
 #-------------------------------------
 CF2TXT="$HOME/Github/navigation/netcdf2text"
 
+# cfradial outdir
+#-------------------------
+CFDIR="${OUTDIR/dorade/cfrad}"
+
+# check existence of directories
+#------------------------------------------------
+if [ ! -d $CFDIR ]; then
+	cf_flag=false
+else
+	cf_flag=true
+fi
+
+if [ ! -d $OUTDIR ]; then
+	out_flag=false
+else
+	out_flag=true
+fi
+
+
 # Processing
 #---------------------------
-if [ ! -d "$OUTDIR/cfrad" ]; then
+if [ "$out_flag" = true ]; then
 	echo
-else	
-	echo
-	echo " The output directory: $OUTDIR/cfrad"
+	echo " Output directory: "
+	echo " $OUTDIR"
 	echo " already exists and might contain processed files. "
-	echo " If you continue existing files will be deleted."
+	echo " If you continue existing files will be overwritten."
 	echo
 	read -r -p " Do you want to continue? [y/N] " response
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
-		echo " Deleting existing output files/folders"
+		echo " Overwriting"
 		echo
 		cd $OUTDIR
-		rm -rf cfrad
-		rm swp*
+		rm swp.*		
+		if [ "$cf_flag" = true ]; then		
+			cd $CFDIR
+			nfiles="$(ls -1 | wc -l)"
+			if [ "${nfiles}" != 0 ];then
+				rm cfrad.*
+			fi
+		else
+			mkdir -p $CFDIR
+		fi
 	else
 		echo " Stopping script"
 		echo
 		exit 
-	fi	
+	fi
+else
+	mkdir -p $OUTDIR
 fi
 
 echo " Changing to input directory: $INDIR"
@@ -75,24 +106,22 @@ echo
 echo " Coordinates replaced"
 echo
 echo " Cleaning and moving files to $OUTDIR"
-mkdir $OUTDIR/cfrad 
-mv cfrad.* $OUTDIR/cfrad 
+mv cfrad.* $CFDIR
 cd $INDIR
 rm -rf $RDXOUT
-cd $OUTDIR/cfrad
+cd $CFDIR
 RadxConvert -f cfrad* -dorade -outdir $OUTDIR
-cd $OUTDIR
-cd $RDXOUT
+cd $OUTDIR/$RDXOUT
 mv swp* $OUTDIR
 cd $OUTDIR
 rm -rf $RDXOUT
-echo
-echo " Running netcdf2text in $OUTDIR/cfrad"
-echo
-cd $OUTDIR/cfrad 
-cp $CF2TXT .
-./netcdf2text DZ VG
-rm netcdf2text
+# echo
+# echo " Running netcdf2text in $OUTDIR/cfrad"
+# echo
+# cd $OUTDIR/cfrad 
+# cp $CF2TXT .
+# ./netcdf2text DZ VE
+# rm netcdf2text
 echo
 echo " Done"
 echo
