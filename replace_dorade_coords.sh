@@ -21,8 +21,9 @@
 # INDIR="$HOME/P3/dorade/case03_all/leg03"
 # OUTDIR="$HOME/P3/dorade/case03_coords_cor/leg03_new"
 
-INDIR="$HOME/P3_v2/dorade/c03/leg01_all"
-OUTDIR="$HOME/P3_v2/dorade/c03/leg01_cor"
+#--------------------------------
+# INDIR="$HOME/P3_v2/dorade/c03/leg01_all"
+INDIR="$HOME/P3_v2/dorade/c03/leg03_all"
 
 # standard tape file
 #---------------------------
@@ -33,9 +34,10 @@ STDTAPE="$HOME/Github/correct_coords/010123I.nc"
 #---------------------------
 PYFUN="$HOME/Github/correct_coords/replace_cfradial_coords.py"
 
-# cfradial to text converter script (needed for later nav correction)
-#-------------------------------------
-CF2TXT="$HOME/Github/navigation/netcdf2text"
+# dorade outdir
+#---------------------
+# OUTDIR="$HOME/P3_v2/dorade/c03/leg03_cor"
+OUTDIR="${INDIR/all/cor}"
 
 # cfradial outdir
 #-------------------------
@@ -70,7 +72,10 @@ if [ "$out_flag" = true ]; then
 		echo " Overwriting"
 		echo
 		cd $OUTDIR
-		rm swp.*		
+		nfiles="$(ls -1 | wc -l)"
+		if [ "${nfiles}" != 0 ];then
+			rm swp.*
+		fi				
 		if [ "$cf_flag" = true ]; then		
 			cd $CFDIR
 			nfiles="$(ls -1 | wc -l)"
@@ -87,6 +92,7 @@ if [ "$out_flag" = true ]; then
 	fi
 else
 	mkdir -p $OUTDIR
+	mkdir -p $CFDIR
 fi
 
 echo " Changing to input directory: $INDIR"
