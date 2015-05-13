@@ -121,13 +121,6 @@ cd $OUTDIR/$RDXOUT
 mv swp* $OUTDIR
 cd $OUTDIR
 rm -rf $RDXOUT
-# echo
-# echo " Running netcdf2text in $OUTDIR/cfrad"
-# echo
-# cd $OUTDIR/cfrad 
-# cp $CF2TXT .
-# ./netcdf2text DZ VE
-# rm netcdf2text
 echo
 echo " Done"
 echo
